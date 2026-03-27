@@ -1,0 +1,24 @@
+cat > .gitignore << 'EOF'
+# Python
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+
+# Keras model
+*.keras
+
+# Uploads & generated files
+uploads/
+static/spectrograms/
+
+# Audio files
+*.wav
+*.mp3
+*.ogg
+
+# OS
+.DS_Store
+Thumbs.db
+EOF

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engine Diagnostics | Sound Analysis</title>
+    
+    <!-- Favicon - Multiple formats for maximum compatibility -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M12 12C13.6569 12 15 10.6569 15 9C15 7.34315 13.6569 6 12 6C10.3431 6 9 7.34315 9 9C9 10.6569 10.3431 12 12 12Z" stroke="currentColor" stroke-width="2"/>
+                        <path d="M12 12V22" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    <h1>Engine<span>Diagnostics</span></h1>
+                </div>
+                <button type="button" class="btn-help" id="helpBtn" title="How to use">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                        <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3m.08 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Upload Section -->
+            <section class="upload-section" id="uploadSection">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Upload Engine Sound</h2>
+                        <p class="subtitle">Upload or record audio for acoustic analysis (max 30 seconds)</p>
+                    </div>
+                    
+                    <form id="uploadForm" class="upload-form">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 5V19M12 5L8 9M12 5L16 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M3 13V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </div>
+                            <div class="upload-text">
+                                <p class="upload-primary">Drop your file here or <span class="link">browse</span></p>
+                                <p class="upload-secondary">WAV, MP3, OGG, FLAC, M4A • Max 5 seconds analyzed</p>
+                            </div>
+                            <input type="file" id="fileInput" name="file" accept="audio/*,.wav,.mp3,.ogg,.flac,.m4a,.aac,.wma" hidden>
+                        </div>
+
+                        <!-- Recording Option Button -->
+                        <button type="button" class="btn-record" id="recordBtn">
+                            <svg class="record-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/>
+                                <path d="M12 1v3m0 16v3M1 12h3m16 0h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            <span class="record-text">Record Audio</span>
+                        </button>
+
+                        <!-- Recording Controls (hidden by default) -->
+                        <div class="recording-controls" id="recordingControls" style="display: none;">
+                            <div class="recording-indicator">
+                                <span class="recording-dot"></span>
+                                <span class="recording-time" id="recordingTime">0:00</span>
+                            </div>
+                            <button type="button" class="btn-stop-record" id="stopRecordBtn">Stop Recording</button>
+                        </div>
+
+                        <!-- File Info with Audio Player -->
+                        <div class="file-info" id="fileInfo" style="display: none;">
+                            <div class="file-header">
+                                <div class="file-details">
+                                    <svg class="file-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2"/>
+                                    </svg>
+                                    <div class="file-meta">
+                                        <p class="file-name" id="fileName"></p>
+                                        <p class="file-size" id="fileSize"></p>
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <button type="button" class="btn-trim" id="cutBtn" style="display: none;" title="Trim audio">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M14.121 15.536c-1.171 1.952-3.07 1.952-4.242 0-1.172-1.952-1.172-5.119 0-7.071 1.172-1.953 3.07-1.953 4.242 0M8 17.657l6 3.464M16 17.657l-6 3.464" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                        <span>Trim</span>
+                                    </button>
+                                    <button type="button" class="icon-btn" id="removeFile" title="Remove file">
+                                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Selected Segment Info -->
+                            <div class="segment-selected-info" id="segmentSelectedInfo" style="display: none;">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 14px; height: 14px;">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span>Selected: <strong id="selectedSegmentDisplay">0:00 - 0:05</strong></span>
+                            </div>
+
+                            <!-- Audio Player -->
+                            <div class="audio-player">
+                                <audio id="audioPlayer" preload="metadata"></audio>
+                                
+                                <div class="player-controls">
+                                    <button type="button" class="play-btn" id="playBtn">
+                                        <svg class="play-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M8 5v14l11-7L8 5z" fill="currentColor"/>
+                                        </svg>
+                                        <svg class="pause-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="currentColor"/>
+                                        </svg>
+                                    </button>
+                                    
+                                    <div class="player-timeline">
+                                        <div class="timeline-track">
+                                            <div class="timeline-progress" id="timelineProgress"></div>
+                                            <div class="timeline-selection" id="timelineSelection"></div>
+                                        </div>
+                                        <input type="range" class="timeline-slider" id="timelineSlider" min="0" max="100" value="0" step="0.1">
+                                    </div>
+                                    
+                                    <div class="player-time">
+                                        <span id="currentTime">0:00</span>
+                                        <span class="time-separator">/</span>
+                                        <span id="totalTime">0:00</span>
+                                    </div>
+                                </div>
+
+                                <!-- Waveform Visualization -->
+                                <div class="waveform-container">
+                                    <canvas id="waveformCanvas" width="800" height="60"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Time Segment Selector (for audio > 5 seconds) -->
+                            <div class="time-selector" id="timeSelector" style="display: none;">
+                                <div class="selector-header">
+                                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                    <span>Drag the 5-second block to select segment</span>
+                                </div>
+                                
+                                <!-- Visual Timeline with Draggable Block -->
+                                <div class="timeline-selector">
+                                    <div class="timeline-track-full" id="timelineTrackFull">
+                                        <!-- Time markers -->
+                                        <div class="time-markers" id="timeMarkers"></div>
+                                        
+                                        <!-- Draggable 5-second block -->
+                                        <div class="segment-block" id="segmentBlock">
+                                            <div class="segment-handle-left"></div>
+                                            <div class="segment-content">
+                                                <span class="segment-duration">5s</span>
+                                            </div>
+                                            <div class="segment-handle-right"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Time display -->
+                                    <div class="segment-info">
+                                        <span class="segment-label">Analyzing:</span>
+                                        <span class="segment-time" id="segmentTime">0:00 - 0:05</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary" id="analyzeBtn" disabled style="display: none;">
+                            <span class="btn-text">Analyze Sound</span>
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13 5l7 7-7 7M5 12h15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Waveform Visualization -->
+                <div class="waveform">
+                    <div class="wave-bar" style="animation-delay: 0s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.1s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.2s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.3s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.4s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.2s;"></div>
+                    <div class="wave-bar" style="animation-delay: 0.1s;"></div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section" id="resultsSection" style="display: none;">
+                <div class="card result-card">
+                    <div class="result-header">
+                        <h2>Diagnostic Results</h2>
+                        <button class="btn-secondary" id="newAnalysis">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"/>
+                            </svg>
+                            New Analysis
+                        </button>
+                    </div>
+
+                    <div class="result-body">
+                        <div class="diagnosis-badge">
+                            <span class="badge-label">Diagnosis</span>
+                            <h3 class="diagnosis-value" id="diagnosisValue">---</h3>
+                        </div>
+
+                        <div class="confidence-meter">
+                            <div class="meter-header">
+                                <span class="meter-label">Confidence Score</span>
+                                <span class="meter-value" id="confidenceValue">0%</span>
+                            </div>
+                            <div class="meter-bar">
+                                <div class="meter-fill" id="confidenceFill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="result-meta">
+                            <div class="meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <span id="resultFileName">---</span>
+                            </div>
+                            <div class="meta-item">
+                                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                <span id="analysisTime">---</span>
+                            </div>
+                        </div>
+                        
+                        <!-- View Possible Causes Button -->
+                        <button type="button" class="btn-view-causes" id="viewCausesBtn">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span>View Possible Causes</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading State -->
+            <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Analyzing acoustic patterns...</p>
+                    <div class="loading-waveform">
+                        <div class="loading-wave"></div>
+                        <div class="loading-wave"></div>
+                        <div class="loading-wave"></div>
+                        <div class="loading-wave"></div>
+                        <div class="loading-wave"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Powered by MobileNet</p>
+  
+        </footer>
+    </div>
+
+    <!-- Possible Causes Modal -->
+    <div class="causes-modal" id="causesModal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content causes-content">
+            <div class="modal-header">
+                <h3 id="causesTitle">🔧 Possible Causes</h3>
+                <button class="modal-close" id="causesClose">✕</button>
+            </div>
+            
+            <!-- Spectrogram Evidence Section (outside causesBody to prevent removal) -->
+            <div class="spectrogram-section" id="spectrogramSection" style="display: none;">
+                <h4>📊 Acoustic Pattern Analysis</h4>
+                <div class="spectrogram-container">
+                    <img id="spectrogramImage" src="" alt="Spectrogram Analysis" />
+                    <div class="spectrogram-overlay">
+                        <div class="frequency-markers">
+                            <span class="marker-label">High Freq</span>
+                            <span class="marker-label">Mid Freq</span>
+                            <span class="marker-label">Low Freq</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="spectrogram-caption" id="spectrogramCaption">
+                    Visual representation of sound frequencies detected in your engine audio.
+                </p>
+            </div>
+            
+            <div class="causes-body" id="causesBody">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            
+            <div class="modal-footer">
+                <!-- References section (collapsible) -->
+                <details class="references-section" id="referencesSection" style="display: none;">
+                    <summary>📚 Scientific References</summary>
+                    <div class="references-list" id="referencesList">
+                        <!-- References will be inserted here -->
+                    </div>
+                </details>
+                
+                <p class="causes-disclaimer">
+                    <strong>⚠️ Note:</strong> This analysis is based on acoustic patterns. 
+                    Consult a certified mechanic for accurate diagnosis and repairs.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div class="help-modal" id="helpModal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content help-content">
+            <div class="modal-header">
+                <h3>📖 How to Use</h3>
+                <button class="modal-close" id="helpClose">✕</button>
+            </div>
+            
+            <div class="help-body">
+                <!-- Steps Section -->
+                <section class="help-section">
+                    <h4>🎯 Detection Steps</h4>
+                    <ol class="help-steps">
+                        <li>
+                            <strong>Prepare the Engine</strong>
+                            <ul>
+                                <li>Park safely and reduce background noise</li>
+                                <li>Keep the engine at idle</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Record the Sound</strong>
+                            <ul>
+                                <li>Place device near the engine (6-12 inches)</li>
+                                <li>Tap "Record Audio" or upload audio file</li>
+                                <li>Record for 5-30 seconds</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Repeat 3 Times</strong>
+                            <ul>
+                                <li>Record the engine sound three (3) times</li>
+                                <li>Use different angles if possible</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Result Rule</strong>
+                            <ul>
+                                <li>If fault detected <strong>2 out of 3 times</strong>, it's the final result</li>
+                                <li>Example: Clicking (2/3) → Final: <strong>Clicking Fault</strong></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>View Result</strong>
+                            <ul>
+                                <li>Detected engine condition will be displayed</li>
+                                <li>Re-test if results are inconsistent</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </section>
+
+                <!-- Confidence Guide -->
+                <section class="help-section">
+                    <h4>✅ Detection Confidence Guide</h4>
+                    <div class="confidence-guide">
+                        <div class="confidence-item high">
+                            <span class="confidence-badge">3/3</span>
+                            <span class="confidence-label">High Confidence</span>
+                        </div>
+                        <div class="confidence-item accepted">
+                            <span class="confidence-badge">2/3</span>
+                            <span class="confidence-label">Accepted Result</span>
+                        </div>
+                        <div class="confidence-item uncertain">
+                            <span class="confidence-badge">1/3</span>
+                            <span class="confidence-label">Uncertain (Try Again)</span>
+                        </div>
+                        <div class="confidence-item normal">
+                            <span class="confidence-badge">0/3</span>
+                            <span class="confidence-label">Normal / No Fault</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Possible Causes -->
+                <section class="help-section">
+                    <h4>🔧 Possible Causes</h4>
+                    
+                    <div class="cause-item">
+                        <h5>⚙️ Timing Belt Issue</h5>
+                        <ul>
+                            <li>Worn or loose timing belt</li>
+                            <li>Incorrect belt tension</li>
+                            <li>Misalignment or aging belt</li>
+                        </ul>
+                    </div>
+
+                    <div class="cause-item">
+                        <h5>🔊 Clicking Sound</h5>
+                        <ul>
+                            <li>Worn valve lifters</li>
+                            <li>Low or dirty engine oil</li>
+                            <li>Poor lubrication</li>
+                        </ul>
+                    </div>
+
+                    <div class="cause-item">
+                        <h5>🔨 Rod Knock</h5>
+                        <ul>
+                            <li>Worn connecting rod bearings</li>
+                            <li>Low oil pressure</li>
+                            <li>Severe engine wear</li>
+                        </ul>
+                    </div>
+
+                    <div class="cause-item">
+                        <h5>💥 Engine Knocking</h5>
+                        <ul>
+                            <li>Low-octane or incorrect fuel</li>
+                            <li>Carbon buildup</li>
+                            <li>Incorrect ignition timing</li>
+                            <li>Engine overheating</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- Disclaimer -->
+                <section class="help-section disclaimer">
+                    <p>
+                        <strong>ℹ️ Disclaimer:</strong> Results are for guidance only and do not replace professional inspection. 
+                        Always consult a certified mechanic for accurate diagnosis and repairs.
+                    </p>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cut Modal -->
+    <div class="cut-modal" id="cutModal" style="display: none;">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✂️ Select Audio Segment</h3>
+                <button class="modal-close" id="modalClose">✕</button>
+            </div>
+            
+            <p class="modal-subtitle">Drag cyan handles to select at least 5 seconds</p>
+            
+            <!-- Waveform Container -->
+            <div class="cut-waveform-container" id="cutWaveformContainer">
+                <canvas id="cutWaveformCanvas" width="800" height="150"></canvas>
+                
+                <!-- Start Handle -->
+                <div class="cut-handle cut-handle-start" id="handleStart">
+                    <div class="handle-line"></div>
+                    <div class="handle-time" id="handleStartTime">0:00</div>
+                </div>
+                
+                <!-- End Handle -->
+                <div class="cut-handle cut-handle-end" id="handleEnd">
+                    <div class="handle-line"></div>
+                    <div class="handle-time" id="handleEndTime">0:05</div>
+                </div>
+                
+                <!-- Selected Region Highlight -->
+                <div class="cut-selected-region" id="cutSelectedRegion"></div>
+                
+                <!-- Playback Indicator Line (moving cursor) -->
+                <div class="playback-indicator" id="playbackIndicator" style="display: none;"></div>
+            </div>
+            
+            <!-- Controls -->
+            <div class="cut-controls">
+                <button class="btn-play-segment" id="playSegmentBtn">
+                    <svg class="play-icon-segment" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8 5v14l11-7L8 5z" fill="currentColor"/>
+                    </svg>
+                    <svg class="pause-icon-segment" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none;">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" fill="currentColor"/>
+                    </svg>
+                    <span>Preview Selection</span>
+                </button>
+                
+                <div class="cut-duration">
+                    Duration: <strong id="cutDurationDisplay">5.0s</strong>
+                    <span id="cutWarning" style="display:none; color: #ff5252; margin-left: 8px;">⚠️ Min 5s</span>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" id="modalCancel">Cancel</button>
+                <button class="btn-modal-confirm" id="modalConfirm">✓ Use This Segment</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
